@@ -42,7 +42,6 @@
         }
     </style>
 </head>
-<!-- L'arrière-plan a été mis à jour avec une image d'épices -->
 <body class="background-spices p-4 sm:p-6 lg:p-8">
 
     <!-- Conteneur principal de l'application -->
@@ -50,11 +49,9 @@
         
         <!-- En-tête de l'application -->
         <header class="text-center mb-8">
-            <!-- Mise à jour du dégradé du titre pour inclure l'orange et le jaune, et la nouvelle police -->
             <h1 class="text-5xl font-bold mb-2 bg-gradient-to-r from-amber-500 to-yellow-400 bg-clip-text text-transparent title-shadow romantic-title">
                 BRITHYS BOUTIQUE-MALEWA
             </h1>
-            <!-- Logo de la dame en cuisinier. L'URL a été mise à jour. -->
             <div class="flex justify-center my-4">
                 <img 
                     src="https://placehold.co/112x112/cccccc/333333?text=Logo+Chef"
@@ -105,6 +102,12 @@
             <aside class="lg:col-span-1 bg-gray-50 rounded-lg p-6 shadow-md h-fit sticky top-6">
                 <h3 class="text-2xl font-semibold text-gray-800 mb-4">Votre Panier</h3>
                 
+                <!-- Champs pour le nom du client et l'adresse de livraison -->
+                <div class="mb-4 space-y-2">
+                    <input type="text" id="client-name" placeholder="Votre nom" class="w-full p-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-1 focus:ring-emerald-500">
+                    <input type="text" id="client-address" placeholder="Votre adresse de livraison" class="w-full p-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-1 focus:ring-emerald-500">
+                </div>
+
                 <!-- Liste des articles du panier -->
                 <div id="cart-items" class="space-y-4">
                     <p class="text-gray-500 text-center" id="empty-cart-message">Votre panier est vide.</p>
@@ -178,6 +181,9 @@
 
             // --- VARIABLES GLOBALES ET DONNÉES ---
             
+            // Numéro de téléphone du restaurant pour les commandes (à remplacer par le vrai numéro)
+            const restaurantPhoneNumber = "+243817187050";
+
             // Panier d'achat, initialisé comme un objet vide
             let cart = {};
 
@@ -218,6 +224,8 @@
             const placeOrderBtn = document.getElementById('place-order-btn');
             const emptyCartMessage = document.getElementById('empty-cart-message');
             const searchInput = document.getElementById('search-input');
+            const clientNameInput = document.getElementById('client-name');
+            const clientAddressInput = document.getElementById('client-address');
             
             // Sélécteurs de la modale
             const modalOverlay = document.getElementById('modal-overlay');
@@ -320,99 +328,4 @@
                         // L'arrière-plan des articles du panier est maintenant gris clair
                         itemElement.className = 'flex justify-between items-center bg-gray-100 p-4 rounded-lg shadow-sm';
                         itemElement.innerHTML = `
-                            <div class="flex-grow">
-                                <p class="text-gray-800 font-medium">${cartItem.name}</p>
-                                <p class="text-sm text-gray-500">${cartItem.quantity} x ${cartItem.price.toFixed(2)} FC</p>
-                            </div>
-                            <span class="text-gray-700 font-semibold">${(cartItem.price * cartItem.quantity).toFixed(2)} FC</span>
-                        `;
-                        cartItemsContainer.appendChild(itemElement);
-                        total += cartItem.price * cartItem.quantity;
-                    });
-                }
-                
-                cartTotalElement.textContent = `${total.toFixed(2)} FC`;
-            }
-            
-            // --- GESTION DES ÉVÉNEMENTS ---
-
-            /**
-             * Gère l'ajout d'un article au panier.
-             * @param {Event} event - L'objet événement du clic.
-             */
-            function handleAddToCart(event) {
-                const button = event.currentTarget;
-                const itemId = button.dataset.id;
-                const quantityInput = document.getElementById(`qty-${itemId}`);
-                let quantity = parseInt(quantityInput.value, 10);
-
-                // Assure que la quantité est un nombre positif
-                if (isNaN(quantity) || quantity <= 0) {
-                    quantity = 1;
-                }
-                
-                const item = allItems.find(i => i.id === itemId);
-
-                if (item) {
-                    if (cart[itemId]) {
-                        // L'article est déjà dans le panier, met à jour la quantité
-                        cart[itemId].quantity += quantity;
-                    } else {
-                        // Ajoute l'article au panier
-                        cart[itemId] = { ...item, quantity: quantity };
-                    }
-                    renderCart();
-                    showModal('Article Ajouté', `${quantity} x ${item.name} a été ajouté à votre panier.`);
-                }
-            }
-
-            /**
-             * Gère le processus de commande.
-             */
-            function handlePlaceOrder() {
-                if (Object.keys(cart).length === 0) {
-                    showModal('Panier Vide', 'Veuillez ajouter des articles à votre panier avant de commander.');
-                    return;
-                }
-
-                // Afficher un résumé de la commande dans la console pour l'instant
-                console.log("--- COMMANDE PASSÉE ---");
-                console.log("Détails de la commande:");
-                let totalAmount = 0;
-                Object.keys(cart).forEach(itemId => {
-                    const item = cart[itemId];
-                    const itemTotal = item.price * item.quantity;
-                    console.log(`${item.name} - Quantité: ${item.quantity} - Prix unitaire: ${item.price.toFixed(2)} FC - Total: ${itemTotal.toFixed(2)} FC`);
-                    totalAmount += itemTotal;
-                });
-                console.log(`Montant Total de la Commande: ${totalAmount.toFixed(2)} FC`);
-                console.log("------------------------");
-
-                // Nettoyer le panier après la commande
-                cart = {};
-                renderCart();
-                showModal('Commande Confirmée', `Votre commande de ${totalAmount.toFixed(2)} FC a été passée avec succès !`);
-            }
-
-            // --- ÉCOUTEURS D'ÉVÉNEMENTS ---
-            
-            // Écouteur pour la barre de recherche
-            searchInput.addEventListener('input', (event) => {
-                renderItems(event.target.value);
-            });
-
-            // Écouteur pour le bouton de commande
-            placeOrderBtn.addEventListener('click', handlePlaceOrder);
-
-            // Écouteur pour le bouton de fermeture de la modale
-            modalCloseBtn.addEventListener('click', hideModal);
-
-            // --- INITIALISATION ---
-
-            // Rendre les éléments du menu et de la boutique au chargement
-            renderItems();
-            renderCart();
-        });
-    </script>
-</body>
-</html>
+                            <
